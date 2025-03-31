@@ -1,6 +1,6 @@
 -- Tabela base: Pessoa
 CREATE DATABASE ConnectStore;
-
+/*Modificado*/
 use ConnectStore;
 
 CREATE TABLE cliente(
@@ -13,6 +13,18 @@ CREATE TABLE cliente(
     rua varchar(20),
     bairro varchar(20),
     endereco int
+);
+
+CREATE TABLE funcionario(
+	id_funcionario int primary key auto_increment,
+    nome varchar(50) not null,
+    matricula varchar(11) unique not null,
+    salario double not null,
+    idade int not null,
+    telefone char(10),
+    hora_entrada time not null,
+    hora_saida time not null,
+    setor varchar(50) not null
 );
 
 
@@ -28,11 +40,6 @@ CREATE TABLE produto(
 );
 
 
-CREATE TABLE carrinho_compra(
-	id_carrinho int primary key auto_increment,
-    data_insercao date
-);
-
 
 CREATE TABLE carrinho_produto (
 	id_carrinho_produto int primary key auto_increment,
@@ -40,8 +47,32 @@ CREATE TABLE carrinho_produto (
     fk_cliente int,
     data_insercao date,
     quantidade int default 1,
-    foreign key (fk_produto) references produto(id_produto) ON DELETE CASCADE
+    FOREIGN KEY (fk_produto) REFERENCES produto(id_produto) ON UPDATE SET NULL ON DELETE CASCADE,
+    FOREIGN KEY (fk_cliente) REFERENCES cliente(id_cliente) ON UPDATE SET NULL ON DELETE CASCADE
 );
+
+CREATE TABLE venda(
+	id_venda int primary key auto_increment, 
+    data_venda date not null,
+	fk_cliente int,
+    fk_funcionario int,
+    FOREIGN KEY (fk_cliente) REFERENCES cliente(id_cliente) ON UPDATE SET NULL ON DELETE CASCADE,
+	FOREIGN KEY (fk_funcionario) REFERENCES funcionario(id_funcionario) ON UPDATE SET NULL ON DELETE CASCADE 
+);
+
+CREATE TABLE venda_produtos (
+	id_venda int primary key auto_increment,
+    qtd int not null,
+    fk_produto int,
+    fk_venda int,
+    FOREIGN KEY (fk_produto) REFERENCES produto(id_produto) ON UPDATE SET NULL ON DELETE CASCADE,
+    FOREIGN KEY (fk_venda) REFERENCES venda(id_venda) ON UPDATE SET NULL ON DELETE CASCADE
+	
+);
+
+
+
+
 
 /*INSERÇÃO DE CLIENTE*/
 INSERT INTO cliente (nome, cpf, email, senha, telefone, rua, bairro, endereco) VALUES
@@ -60,15 +91,35 @@ INSERT INTO produto (nome, preco, marca, modelo, descricao, tipo, estoque) VALUE
 ('Fone Bluetooth JBL', 349.00, 'JBL', 'Tune500BT', 'Fone de ouvido Bluetooth com graves potentes', 'Fone', 15),
 ('Galaxy Tab A8', 1499.00, 'Samsung', 'A8', 'Tablet com tela de 10.5", 64GB', 'Tablet', 12);
 
+INSERT INTO funcionario(nome, matricula, salario, hora_entrada, hora_saida, setor)
+VALUES ("Ian Kilwiny", "1122321925", 2500, "08:00:00", "17:00:00", "Atendimento");
+
 insert into carrinho_produto(fk_cliente, fk_produto, data_insercao, quantidade)  VALUES (2, 1, "2025-03-30",1);
 
 select *from carrinho_produto;
 
+select *from funcionario;
+
+insert into venda_produto(qtd, data_venda, fk_produto, fk_cliente, fk_funcionario) VALUES (2, "2025-03-31", 5, 2, 1);
+
+insert into venda_produto(qtd, data_venda, fk_produto, fk_cliente, fk_funcionario) VALUES (1, "2025-03-31", 4, 5, 1);
+
+
+/*Carrinho de compra*/
 select cl.nome, pr.nome, pr.preco from cliente cl
 inner join produto pr 
 inner join carrinho_produto cp
 on cl.id_cliente = cp.fk_cliente and pr.id_produto = cp.fk_produto;
 
+
+/*Compra*/
+select cl.nome as "Nome do Cliente", pr.nome as "Nome do Produto", pr.preco ,fun.nome as "Nome do Funcionário" from cliente cl
+inner join produto pr
+inner join funcionario fun
+inner join venda_produto vd
+on cl.id_cliente = vd.fk_cliente 
+and pr.id_produto = vd.fk_produto
+and fun.id_funcionario = vd.fk_funcionario;
 
 
 
