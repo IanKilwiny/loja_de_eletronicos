@@ -61,7 +61,7 @@ CREATE TABLE venda(
 );
 
 CREATE TABLE venda_produtos (
-	id_venda int primary key auto_increment,
+	id_venda_produto int primary key auto_increment,
     qtd int not null,
     fk_produto int,
     fk_venda int,
@@ -69,9 +69,6 @@ CREATE TABLE venda_produtos (
     FOREIGN KEY (fk_venda) REFERENCES venda(id_venda) ON UPDATE SET NULL ON DELETE CASCADE
 	
 );
-
-
-
 
 
 /*INSERÇÃO DE CLIENTE*/
@@ -91,35 +88,50 @@ INSERT INTO produto (nome, preco, marca, modelo, descricao, tipo, estoque) VALUE
 ('Fone Bluetooth JBL', 349.00, 'JBL', 'Tune500BT', 'Fone de ouvido Bluetooth com graves potentes', 'Fone', 15),
 ('Galaxy Tab A8', 1499.00, 'Samsung', 'A8', 'Tablet com tela de 10.5", 64GB', 'Tablet', 12);
 
-INSERT INTO funcionario(nome, matricula, salario, hora_entrada, hora_saida, setor)
-VALUES ("Ian Kilwiny", "1122321925", 2500, "08:00:00", "17:00:00", "Atendimento");
-
-insert into carrinho_produto(fk_cliente, fk_produto, data_insercao, quantidade)  VALUES (2, 1, "2025-03-30",1);
-
-select *from carrinho_produto;
-
-select *from funcionario;
-
-insert into venda_produto(qtd, data_venda, fk_produto, fk_cliente, fk_funcionario) VALUES (2, "2025-03-31", 5, 2, 1);
-
-insert into venda_produto(qtd, data_venda, fk_produto, fk_cliente, fk_funcionario) VALUES (1, "2025-03-31", 4, 5, 1);
+INSERT INTO funcionario(nome, matricula, salario, telefone, idade, hora_entrada, hora_saida, setor)
+VALUES ("Ian Kilwiny", "1122321925", 2500, "8825263233", 23,"08:00:00", "17:00:00", "Atendimento");
 
 
-/*Carrinho de compra*/
-select cl.nome, pr.nome, pr.preco from cliente cl
-inner join produto pr 
-inner join carrinho_produto cp
-on cl.id_cliente = cp.fk_cliente and pr.id_produto = cp.fk_produto;
+INSERT INTO funcionario(nome, matricula, salario, telefone, idade, hora_entrada, hora_saida, setor)
+VALUES ("Pedro da Silva", "1234567899", 2500, "8825263233", 23,"08:00:00", "17:00:00", "Atendimento"),
+("Carlos Daniel", "2244557822", 2500, "99257522",32, "9:00:22", "19:22:23", "Atendimento");
 
 
 /*Compra*/
-select cl.nome as "Nome do Cliente", pr.nome as "Nome do Produto", pr.preco ,fun.nome as "Nome do Funcionário" from cliente cl
-inner join produto pr
-inner join funcionario fun
-inner join venda_produto vd
-on cl.id_cliente = vd.fk_cliente 
-and pr.id_produto = vd.fk_produto
-and fun.id_funcionario = vd.fk_funcionario;
+INSERT INTO venda(data_venda, fk_cliente, fk_funcionario) VALUES ("2025-04-02",2,1);
+INSERT INTO venda_produtos(qtd, fk_produto, fk_venda) VALUES (2,4,1);
+INSERT INTO venda_produtos(qtd, fk_produto, fk_venda) VALUES (1,1,1);
+INSERT INTO venda_produtos(qtd, fk_produto, fk_venda) VALUES (1,1,1);
+
+INSERT INTO venda(data_venda, fk_cliente, fk_funcionario) VALUES ("2024-08-10",3,2);
+INSERT INTO venda_produtos(qtd, fk_produto, fk_venda) VALUES (3,4,2);
+INSERT INTO venda_produtos(qtd, fk_produto, fk_venda) VALUES (1,3,2);
 
 
+/*inner join correto*/
+SELECT cl.nome,count(pr.nome) AS qtd_produtos, vd.data_venda
+FROM cliente cl
+INNER JOIN venda vd ON cl.id_cliente = vd.fk_cliente
+INNER JOIN venda_produtos vdp ON vd.id_venda = vdp.fk_venda
+INNER JOIN produto pr ON vdp.fk_produto = pr.id_produto
+group by cl.nome;
+
+SELECT 
+    fun.nome AS "Funcionário", 
+    cl.nome AS "Cliente", 
+    COUNT(vdp.fk_produto) AS "Quantidade de Produtos"
+FROM funcionario fun
+INNER JOIN venda vd ON fun.id_funcionario = vd.fk_funcionario
+INNER JOIN cliente cl ON vd.fk_cliente = cl.id_cliente
+INNER JOIN venda_produtos vdp ON vd.id_venda = vdp.fk_venda
+INNER JOIN produto pr ON vdp.fk_produto = pr.id_produto
+GROUP BY cl.nome;
+
+
+
+select *from venda_produtos;
+
+select *from funcionario;
+
+select *from venda;
 
